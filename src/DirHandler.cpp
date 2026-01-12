@@ -2,9 +2,9 @@
 
 #include <filesystem>
 
-const char* DirHandler::cur() {
+std::string DirHandler::cur() {
     try {
-        return std::filesystem::current_path().string().c_str();
+        return std::filesystem::current_path().string();
     } catch(...) {
         return "";
     }

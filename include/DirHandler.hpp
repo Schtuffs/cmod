@@ -1,8 +1,10 @@
 #pragma once
 
+#include <string>
+
 namespace DirHandler {
     // Returns the current directory
-    const char* cur();
+    std::string cur();
     
     // Recursively copies a file
     bool copy(const char* src, const char* dst);

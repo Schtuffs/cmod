@@ -45,7 +45,7 @@ bool copyModule(const std::string& module) {
     }
 
     std::string src = std::string(env) + std::string("/") + module;
-    std::string dst = DirHandler::cur() + std::string(MODULES_DIR) + module;
+    std::string dst = DirHandler::cur() + std::string("/") + std::string(MODULES_DIR) + module;
 
     if (!DirHandler::mkdir(dst.c_str())) {
         return false;
