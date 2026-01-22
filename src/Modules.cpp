@@ -7,6 +7,10 @@
 
 // Try to find path traversal or other shenanigans
 bool verifyModule(const std::string& module) {
+    if (module.length() == 0) {
+        return false;
+    }
+
     if (module.find("/") != std::string::npos) {
         return false;
     }

@@ -13,7 +13,10 @@
 #include <vector>
 
 #include "Constants.hpp"
+#include "DirHandler.hpp"
 #include "Modules.hpp"
+
+bool IN_VERBOSE_MODE = false;
 
 std::vector<std::string> parseArgs(int argc, char** argv) {
     std::vector<std::string> args;
@@ -30,14 +33,28 @@ void printHelp() {
     std::println();
     std::println("Usage: cmod [options] [command] [module]");
     std::println("options:");
-    std::println("  -h      Prints this menu:");
+    std::println("  -h          Prints this menu");
+    std::println("  --verbose   Prints helpful debug information");
     std::println();
     std::println("command:");
-    std::println("  add     Adds the module to the project");
-    std::println("  remove|rem");
-    std::println("          Removes the module from the project");
-    std::println("  fix     Attempts to fix a broken module");
+    std::println("  list        Lists available modules");
+    std::println("  add         Adds the module to the project");
+    std::println("  remove|rem  Removes the module from the project");
+    std::println("  fix         Attempts to fix a broken module");
     std::println();
+}
+
+void printModules() {
+    auto dirItems = DirHandler::readAll(MODULES_DIR);
+    if (dirItems.size() == 0) {
+        std::println("\nNo modules added.");
+        return;
+    }
+
+    std::println("\nModules:");
+    for (const auto& item : dirItems) {
+        std::println("{}", item.name);
+    }
 }
 
 void printVersion() {
@@ -74,7 +91,20 @@ ArgsResult handleArgs(const std::vector<std::string>& args) {
             printVersion();
             exit((int)CODES::EXIT::GOOD);
         }
-
+        
+        // Version menu
+        if (arg.compare("--verbose") == 0) {
+            IN_VERBOSE_MODE = true;
+            continue;
+        }
+        
+        // list modules
+        if (arg.compare("list") == 0) {
+            printModules();
+            std::println();
+            exit((int)CODES::EXIT::GOOD);
+        }
+        
         // add module
         if (arg.compare("add") == 0) {
             res.command = COMMAND::ADD;
@@ -89,16 +119,17 @@ ArgsResult handleArgs(const std::vector<std::string>& args) {
         if (arg.compare("fix") == 0) {
             res.command = COMMAND::FIX;
         }
-
+        
         // Choose the next arg as the module
         if (res.command != COMMAND::INVALID) {
-            if (i == args.size() - 1) {
+            if (i < args.size() - 1) {
+                res.module = args[i + 1];
+                break;
+            }
+            else {
                 std::println("\nERROR: No module selected.\n");
                 exit((int)CODES::EXIT::NO_MODULE);
             }
-
-            res.module = args[i + 1];
-            break;
         }
     }
 
@@ -112,32 +143,37 @@ int main(int argc, char** argv) {
 
     // Manage commands
     std::println();
+    if (IN_VERBOSE_MODE) {
+        std::println("Command: {}", static_cast<int>(res.command));
+    }
+
     switch (res.command) {
-    case COMMAND::ADD:
-        std::println("Adding module \"{}\"", res.module);
-        if (Modules::add(res.module)) {
-            std::println("Successfully added module \"{}\"", res.module);
-        } else {
-            std::println("Failed to add module \"{}\"", res.module);
+        case COMMAND::ADD: {
+            std::println("Adding module \"{}\"", res.module);
+            if (Modules::add(res.module)) {
+                std::println("Successfully added module \"{}\"", res.module);
+            } else {
+                std::println("Failed to add module \"{}\"", res.module);
+            }
+            break;
         }
-        break;
-        
-        case COMMAND::REM:
-        std::println("Removing module \"{}\"", res.module);
-        if (Modules::remove(res.module)) {
-            std::println("Successfully removed module \"{}\"", res.module);
-        } else {
-            std::println("Failed to remove module \"{}\"", res.module);
+        case COMMAND::REM: {
+            std::println("Removing module \"{}\"", res.module);
+            if (Modules::remove(res.module)) {
+                std::println("Successfully removed module \"{}\"", res.module);
+            } else {
+                std::println("Failed to remove module \"{}\"", res.module);
+            }
+            break;
         }
-        break;
-        
-    case COMMAND::FIX:
-        std::println("TODO!");
-        break;
-        
-    default:
-        std::println("ERROR: No module selected.");
-        break;
+        case COMMAND::FIX: {
+            std::println("TODO!");
+            break;
+        }
+        default: {
+            std::println("ERROR: No module selected.");
+            break;
+        }
     }
 
     std::println();

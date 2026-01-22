@@ -6,6 +6,7 @@ constexpr const char* VERSION       = "1.0";
 
 enum class COMMAND {
     INVALID,
+    LIST,
     ADD,
     REM,
     FIX,
